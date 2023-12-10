@@ -1,8 +1,8 @@
 openapi: 3.0.3
 info:
   title: yaranai
-  description: 
-  version: 0.0.1
+  description: 「やらない」を許容するタスク管理アプリ
+  version: 0.0.2
 externalDocs:
   description: 仕様書
   url: https://md.trap.jp/9uTJhTIRS-WbUzdtRM2-5Q
@@ -155,10 +155,8 @@ paths:
 components:
   schemas:
     ping:
-      type: object
-      properties:
-        type: string
-        example: pong
+      type: string
+      example: pong
     taskWithoutId:
       type: object
       required:
