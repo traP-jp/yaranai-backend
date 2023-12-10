@@ -1,0 +1,223 @@
+openapi: 3.0.3
+info:
+  title: yaranai
+  description: 
+  version: 0.0.1
+externalDocs:
+  description: 仕様書
+  url: https://md.trap.jp/9uTJhTIRS-WbUzdtRM2-5Q
+servers:
+  - url: https://yaranai.trap.show/api
+tags:
+  - name: task
+    description: タスク関連
+  - name: suggestion
+    description: サジェスト関連
+paths:
+  /ping:
+    get:
+      tags:
+        - task
+      summary: 疎通を確認
+      description: 疎通を確認するためのものエンドポイント
+      operationId: ping
+      responses:
+        "200":
+          description: 成功
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ping"
+  /task:
+    get:
+      tags:
+        - task
+      summary: タスクの一覧を取得
+      description: タスクの一覧を取得します。
+      operationId: getTasks
+      responses:
+        "200":
+          description: 成功
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/tasks"
+    post:
+      tags:
+        - task
+      summary: タスクを作成
+      description: タスクを作成します。
+      operationId: postTasks
+      requestBody:
+        description: タスクの内容
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/taskWithoutId"
+      responses:
+        "200":
+          description: 成功
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/task"
+  /task/{id}:
+    get:
+      tags:
+        - task
+      summary: タスクの詳細を取得
+      description: タスクの詳細を取得します。
+      operationId: getTaskDetail
+      parameters:
+        - name: id
+          in: path
+          description: タスクのID
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: 成功
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/task"
+    put:
+      tags:
+        - task
+      summary: タスクを更新
+      description: タスクを更新します。
+      operationId: updateTask
+      parameters:
+        - name: id
+          in: path
+          description: タスクのID
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        description: タスクの内容
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/taskWithoutId"
+      responses:
+        "200":
+          description: 成功
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/task"
+    delete:
+      tags:
+        - task
+      summary: タスクを削除
+      description: タスクを削除します。
+      operationId: deleteTask
+      parameters:
+        - name: id
+          in: path
+          description: タスクのID
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: 成功
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/task"
+  /suggest:
+    get:
+      tags:
+        - suggestion
+      summary: サジェストを取得
+      description: サジェストを取得します。
+      operationId: getSuggest
+      parameters:
+        - name: maxDifficulty
+          in: query
+          description: 許容できる難易度の最大値
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: 成功
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/tasks"
+  
+components:
+  schemas:
+    ping:
+      type: object
+      properties:
+        type: string
+        example: pong
+    taskWithoutId:
+      type: object
+      required:
+        - title
+        - description
+        - possibility
+        - difficulty
+        - dueDate
+      properties:
+        title:
+          type: string
+          example: 単位認定の申請
+        description:
+          type: string
+          example: スコアレポートを教務課に提出する
+        possibility:
+          type: integer
+          example: 2
+          description: タスクが出来る状況の状況ID(デフォルト=いつでもできるタスクは0)
+        difficulty:
+          type: integer
+          example: 2
+          description: "1:気軽にできる, 2: 普通, 3: ハードルが高い"
+        dueDate:
+          type: string
+          format: date
+          example: 2021-01-01
+    task:
+      type: object
+      required:
+        - id
+        - title
+        - description
+        - possibility
+        - difficulty
+        - dueDate
+      properties:
+        id:
+          type: integer
+          example: 1
+        title:
+          type: string
+          example: 単位認定の申請
+        description:
+          type: string
+          example: スコアレポートを教務課に提出する
+        possibility:
+          type: integer
+          example: 2
+          description: タスクが出来る状況の状況ID(デフォルト=いつでもできるタスクは0)
+        difficulty:
+          type: integer
+          example: 2
+          description: "1:気軽にできる, 2: 普通, 3: ハードルが高い"
+        dueDate:
+          type: string
+          format: date
+          example: 2021-01-01
+    tasks:
+      type: array
+      items:
+        $ref: "#/components/schemas/task"   
