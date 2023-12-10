@@ -23,7 +23,10 @@ func main() {
 		log.Fatal(err)
 	}
 	if os.Getenv("NS_MARIADB_USER") == "" {
-		godotenv.Load(".env")
+		err = godotenv.Load(".env")
+		if err != nil {
+			log.Fatal(err)
+		}
 	}
 	fmt.Println(os.Getenv("NS_MARIADB_USER"))
 	fmt.Println("aa")
