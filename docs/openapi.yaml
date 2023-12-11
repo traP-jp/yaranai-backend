@@ -218,6 +218,26 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/possibility"
+    delete:
+      tags:
+        - possibility
+      summary: 状況を削除
+      description: 状況を削除します。
+      operationId: deletePossibility
+      parameters:
+        - name: id
+          in: path
+          description: 状況のID
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: 成功
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/possibility"
 components:
   schemas:
     ping:
