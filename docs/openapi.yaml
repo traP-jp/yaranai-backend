@@ -156,7 +156,7 @@ paths:
   /possibility:
     get:
       tags:
-        - suggestion
+        - possibility
       summary: 状況の一覧を取得
       description: 状況の一覧を取得します。
       operationId: getPossibility
