@@ -15,7 +15,7 @@ CREATE TABLE IF NOT EXISTS `task` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 CREATE TABLE IF NOT EXISTS `possibility` (
   `possibility_id` int(11) NOT NULL AUTO_INCREMENT,
-  `possibility` string NOT NULL,
+  `possibility` text NOT NULL,
   PRIMARY KEY (`possibility_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 INSERT INTO `task` (`user`,`id`,`title`,`description`,`possibility_id`,`difficulty`,`created_at`,`updated_at`,`due_date`) VALUES ('ramdos',1,'電磁気学の課題','第二回の講義までにやる',2,3,'2023-12-01','2023-12-05','2023-12-10');
