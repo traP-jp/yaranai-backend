@@ -2,7 +2,7 @@ openapi: 3.0.3
 info:
   title: yaranai
   description: 「やらない」を許容するタスク管理アプリ
-  version: 0.0.2
+  version: 0.0.3
 externalDocs:
   description: 仕様書
   url: https://md.trap.jp/9uTJhTIRS-WbUzdtRM2-5Q
@@ -13,6 +13,8 @@ tags:
     description: タスク関連
   - name: suggestion
     description: サジェスト関連
+  - name: possibility
+    description: 状況関連
 paths:
   /ping:
     get:
@@ -151,7 +153,71 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/tasks"
-  
+  /possibility:
+    get:
+      tags:
+        - suggestion
+      summary: 状況の一覧を取得
+      description: 状況の一覧を取得します。
+      operationId: getPossibility
+      responses:
+        "200":
+          description: 成功
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/possibilities"
+    post:
+      tags:
+        - possibility
+      summary: 状況を作成
+      description: 状況を作成します。
+      operationId: postPossibility
+      requestBody:
+        description: 状況の内容
+        required: true
+        content:
+          application/json:
+            schema:
+              type: string
+              example: どこでもできる
+      responses:
+        "200":
+          description: 成功
+          content:
+            application/json:
+              schema:
+                type: integer
+                example: 3
+  /possibility/{id}:
+    put:
+      tags:
+        - possibility
+      summary: 状況を更新
+      description: 状況を更新します。
+      operationId: putPossibility
+      parameters:
+        - name: id
+          in: path
+          description: 状況のID
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        description: 状況の内容
+        required: true
+        content:
+          application/json:
+            schema:
+              type: string
+              example: どこでもできる
+      responses:
+        "200":
+          description: 成功
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/possibility"
 components:
   schemas:
     ping:
@@ -218,4 +284,21 @@ components:
     tasks:
       type: array
       items:
-        $ref: "#/components/schemas/task"   
+        $ref: "#/components/schemas/task"
+    possibility:
+      type: object
+      required:
+        - id
+        - name
+      properties:
+        id:
+          type: integer
+          example: 1
+        name:
+          type: string
+          example: どこでもできる
+    possibilities:
+      type: array
+      items:
+        $ref: "#/components/schemas/possibility"
+      
