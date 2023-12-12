@@ -14,7 +14,7 @@ CREATE TABLE IF NOT EXISTS `task` (
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 CREATE TABLE IF NOT EXISTS `condition` (
-  `pcondition_id` int(11) NOT NULL AUTO_INCREMENT,
+  `condition_id` int(11) NOT NULL AUTO_INCREMENT,
   `condition` string NOT NULL,
   PRIMARY KEY (`condition`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
