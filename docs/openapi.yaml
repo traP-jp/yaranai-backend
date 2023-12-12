@@ -13,7 +13,7 @@ tags:
     description: タスク関連
   - name: suggestion
     description: サジェスト関連
-  - name: possibility
+  - name: condition
     description: 状況関連
 paths:
   /ping:
@@ -65,26 +65,6 @@ paths:
               schema:
                 $ref: "#/components/schemas/task"
   /task/{id}:
-    get:
-      tags:
-        - task
-      summary: タスクの詳細を取得
-      description: タスクの詳細を取得します。
-      operationId: getTaskDetail
-      parameters:
-        - name: id
-          in: path
-          description: タスクのID
-          required: true
-          schema:
-            type: integer
-      responses:
-        "200":
-          description: 成功
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/task"
     put:
       tags:
         - task
@@ -153,26 +133,26 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/tasks"
-  /possibility:
+  /condition:
     get:
       tags:
-        - possibility
+        - condition
       summary: 状況の一覧を取得
       description: 状況の一覧を取得します。
-      operationId: getPossibility
+      operationId: getConditions
       responses:
         "200":
           description: 成功
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/possibilities"
+                $ref: "#/components/schemas/conditions"
     post:
       tags:
-        - possibility
+        - condition
       summary: 状況を作成
       description: 状況を作成します。
-      operationId: postPossibility
+      operationId: postCondition
       requestBody:
         description: 状況の内容
         required: true
@@ -189,13 +169,13 @@ paths:
               schema:
                 type: integer
                 example: 3
-  /possibility/{id}:
+  /condition/{id}:
     put:
       tags:
-        - possibility
+        - condition
       summary: 状況を更新
       description: 状況を更新します。
-      operationId: putPossibility
+      operationId: putCondition
       parameters:
         - name: id
           in: path
@@ -217,13 +197,13 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/possibility"
+                $ref: "#/components/schemas/condition"
     delete:
       tags:
-        - possibility
+        - condition
       summary: 状況を削除
       description: 状況を削除します。
-      operationId: deletePossibility
+      operationId: deleteCondition
       parameters:
         - name: id
           in: path
@@ -237,7 +217,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/possibility"
+                $ref: "#/components/schemas/condition"
 components:
   schemas:
     ping:
@@ -248,7 +228,7 @@ components:
       required:
         - title
         - description
-        - possibility
+        - condition
         - difficulty
         - dueDate
       properties:
@@ -258,7 +238,7 @@ components:
         description:
           type: string
           example: スコアレポートを教務課に提出する
-        possibility:
+        condition:
           type: integer
           example: 2
           description: タスクが出来る状況の状況ID(デフォルト=いつでもできるタスクは0)
@@ -276,7 +256,7 @@ components:
         - id
         - title
         - description
-        - possibility
+        - condition
         - difficulty
         - dueDate
       properties:
@@ -289,7 +269,7 @@ components:
         description:
           type: string
           example: スコアレポートを教務課に提出する
-        possibility:
+        condition:
           type: integer
           example: 2
           description: タスクが出来る状況の状況ID(デフォルト=いつでもできるタスクは0)
@@ -305,7 +285,7 @@ components:
       type: array
       items:
         $ref: "#/components/schemas/task"
-    possibility:
+    condition:
       type: object
       required:
         - id
@@ -317,8 +297,8 @@ components:
         name:
           type: string
           example: どこでもできる
-    possibilities:
+    conditions:
       type: array
       items:
-        $ref: "#/components/schemas/possibility"
+        $ref: "#/components/schemas/condition"
       
