@@ -7,7 +7,7 @@ type Task struct {
 	Id          int       `json:"id" db:"id"`
 	Title       string    `json:"title" db:"title"`
 	Description string    `json:"description" db:"description"`
-	Possibility int       `json:"possibility" db:"possibility_id"`
+	Possibility int       `json:"condition_id" db:"condition_id"`
 	Difficulty  int       `json:"difficulty" db:"difficulty"`
 	CreatedAt   time.Time `json:"created_at" db:"created_at"`
 	UpdatedAt   time.Time `json:"updated_at" db:"updated_at"`
