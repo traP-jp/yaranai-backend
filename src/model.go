@@ -33,6 +33,9 @@ type TaskWithoutId struct {
 	DueDate     time.Time `json:"due_date" db:"due_date"`
 }
 type Condition struct {
-	Id int `json:"id"`
-	Name string `json:"name"`
+	Id int `json:"id" db:"condition_id"`
+	Name string `json:"name,omitempty" db:"condition"`
+}
+type ConditionRequestBody struct {
+	Name string `json:"name,omitempty" db:"condition"`
 }

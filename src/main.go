@@ -56,7 +56,9 @@ func main() {
 	e.GET("/task", getTaskHandler)
 
 	e.GET("/condition", getConditionHandler)
-	
+
+	e.POST("/condition", postConditionHandler)
+
 	e.Start(":8080")
 }
 func pingHandler(c echo.Context) error {
