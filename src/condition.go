@@ -22,6 +22,11 @@ func getConditionHandler(c echo.Context) error {
 }
 
 func postConditionHandler(c echo.Context) error {
+	var payload AuthHeader
+	(&echo.DefaultBinder{}).BindHeaders(c, &payload)
+	userId := payload.UserId
+
+	//JSONリクエストボディのBind
 	conditionreq := &ConditionRequestBody{}
 	err := c.Bind(conditionreq)
 
@@ -29,39 +34,42 @@ func postConditionHandler(c echo.Context) error {
 		return c.JSON(http.StatusBadRequest, err)
 	}
 
+	//空白(0文字)状況登録の制限
 	if len(conditionreq.Name) == 0 {
 		return c.JSON(http.StatusBadRequest, "Name cannot be empty")
 	}
 
-	_, err = db.Exec("INSERT INTO `condition` (`condition`) VALUES(?)", conditionreq.Name)
+	_, err = db.Exec("INSERT INTO `condition` (`user`,`condition`) VALUES(?,?)", userId, conditionreq.Name)
 
 	if err != nil {
 		fmt.Println(err)
 		return c.String(http.StatusInternalServerError, err.Error())
 	}
 
+	//追加した状況のcondition_idを取得
 	var condition int
 	err = db.Get(&condition, "SELECT `condition_id` FROM `condition` WHERE `condition` = ? ORDER BY `condition_id` DESC", conditionreq.Name)
 	if err != nil {
 		fmt.Println(err)
 		return c.String(http.StatusInternalServerError, err.Error())
 	}
+
 	conditionstr := strconv.Itoa(condition)
 	return c.String(http.StatusOK, conditionstr)
-	
+
 }
 
 func deleteConditionHandler(c echo.Context) error {
 	var payload AuthHeader
 	(&echo.DefaultBinder{}).BindHeaders(c, &payload)
 	userId := payload.UserId
-	
+
 	//idのint変換
 	deleteidstr := c.Param("id")
 	deleteid, err := strconv.Atoi(deleteidstr)
-	if err!= nil {
-    return c.String(http.StatusBadRequest, err.Error())
-  }
+	if err != nil {
+		return c.String(http.StatusBadRequest, err.Error())
+	}
 
 	var condition Condition
 	err = db.Get(&condition, "SELECT * FROM `condition` WHERE `condition_id` =?", deleteid)
