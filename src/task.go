@@ -65,3 +65,33 @@ func postTaskHandler(c echo.Context) error {
 
 	return c.JSON(http.StatusCreated, addedTask)
 }
+func deleteTaskHandler(c echo.Context) error {
+	var payload AuthHeader
+	(&echo.DefaultBinder{}).BindHeaders(c, &payload)
+	userId := payload.UserId
+
+	taskId := c.Param("id")
+
+	var task Task
+	if err := db.Get(&task, "SELECT * FROM task WHERE id = ?", taskId); err != nil {
+		fmt.Println(err)
+		return c.JSON(http.StatusInternalServerError, map[string]string{"error": "Failed to get task"})
+	}
+	if task.User != userId {
+		return c.JSON(http.StatusUnauthorized, map[string]string{"error": "This task is not yours"})
+	}
+
+	_, err := db.Exec("DELETE FROM task WHERE id = ?", taskId)
+	if err != nil {
+		fmt.Println(err)
+		return c.JSON(http.StatusInternalServerError, map[string]string{"error": "Failed to delete task"})
+	}
+	return c.JSON(http.StatusOK, TaskRes{
+		Id:          task.Id,
+		Title:       task.Title,
+		Description: task.Description,
+		ConditionId: task.ConditionId,
+		Difficulty:  task.Difficulty,
+		DueDate:     task.DueDate.Format("2006-01-02"),
+	})
+}
