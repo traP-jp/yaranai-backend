@@ -24,7 +24,7 @@ func getTaskHandler(c echo.Context) error {
 			Description: v.Description,
 			ConditionId: v.ConditionId,
 			Difficulty:  v.Difficulty,
-			DueDate:     v.DueDate,
+			DueDate:     v.DueDate.Format("2006-01-02"),
 		})
 	}
 	return c.JSON(http.StatusOK, res)
@@ -40,7 +40,7 @@ func postTaskHandler(c echo.Context) error {
 		return c.JSON(http.StatusBadRequest, map[string]string{"error": "Invalid request payload"})
 	}
 
-	dateOfNow := time.Now().Format("2006-01-02")
+	dateOfNow := time.Now()
 	res, err := db.Exec("INSERT INTO task (user, title, description, condition_id, difficulty, created_at, updated_at, dueDate) VALUES (?,?,?,?,?,?,?,?)", userId, newTask.Title, newTask.Description, newTask.ConditionId, newTask.Difficulty, dateOfNow, dateOfNow, newTask.DueDate)
 
 	if err != nil {
