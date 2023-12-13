@@ -40,13 +40,15 @@ func postConditionHandler(c echo.Context) error {
 		return c.String(http.StatusInternalServerError, err.Error())
 	}
 
-	var condition Condition
-	err = db.Get(&condition.Id, "SELECT `condition_id` FROM `condition` WHERE `condition` = ? ORDER BY `condition_id` DESC", conditionreq.Name)
+	var condition int
+	err = db.Get(&condition, "SELECT `condition_id` FROM `condition` WHERE `condition` = ? ORDER BY `condition_id` DESC", conditionreq.Name)
 	if err != nil {
 		fmt.Println(err)
 		return c.String(http.StatusInternalServerError, err.Error())
 	}
-	return c.JSON(http.StatusOK, condition)
+	conditionstr := strconv.Itoa(condition)
+	return c.String(http.StatusOK, conditionstr)
+	
 }
 
 func deleteConditionHandler(c echo.Context) error {
