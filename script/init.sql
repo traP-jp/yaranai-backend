@@ -15,6 +15,7 @@ CREATE TABLE `task` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 CREATE TABLE `condition` (
   `condition_id` int(11) NOT NULL AUTO_INCREMENT,
+  `user` text NOT NULL,
   `condition` text NOT NULL,
   PRIMARY KEY (`condition_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
