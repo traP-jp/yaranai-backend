@@ -25,7 +25,6 @@ func getTaskHandler(c echo.Context) error {
 			ConditionId: v.ConditionId,
 			Difficulty:  v.Difficulty,
 			DueDate:     v.DueDate,
-			User:        v.User,
 		})
 	}
 	return c.JSON(http.StatusOK, res)
@@ -62,7 +61,6 @@ func postTaskHandler(c echo.Context) error {
 		ConditionId: newTask.ConditionId,
 		Difficulty:  newTask.Difficulty,
 		DueDate:     newTask.DueDate,
-		User:        userId,
 	}
 
 	return c.JSON(http.StatusCreated, addedTask)

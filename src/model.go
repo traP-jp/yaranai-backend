@@ -15,7 +15,6 @@ type Task struct {
 	DueDate     string `json:"dueDate" db:"dueDate"`
 }
 type TaskRes struct {
-	User        string `json:"user" db:"user"`
 	Id          int    `json:"id" db:"id"`
 	Title       string `json:"title" db:"title"`
 	Description string `json:"description" db:"description"`
@@ -24,7 +23,6 @@ type TaskRes struct {
 	DueDate     string `json:"dueDate" db:"dueDate"`
 }
 type TaskWithoutId struct {
-	User        string `json:"user" db:"user"`
 	Title       string `json:"title" db:"title"`
 	Description string `json:"description" db:"description"`
 	ConditionId int    `json:"condition" db:"condition_id"`
