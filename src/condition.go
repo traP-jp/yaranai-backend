@@ -11,6 +11,7 @@ func getConditionHandler(c echo.Context) error {
 	var conditions []Condition
 	if err := db.Select(&conditions, "SELECT * FROM `condition`"); err != nil {
 		fmt.Println(err)
+		return c.String(http.StatusInternalServerError, err.Error())
 	}
 	return c.JSON(http.StatusOK, conditions)
 }
