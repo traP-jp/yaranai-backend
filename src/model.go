@@ -27,7 +27,6 @@ type TaskRes struct {
 }
 type TaskWithoutId struct {
 	User        string    `json:"user" db:"user"`
-	Title       string    `json:"title" db:"title"`
 	Description string    `json:"description" db:"description"`
 	ConditionId int       `json:"condition" db:"condition_id"`
 	Difficulty  int       `json:"difficulty" db:"difficulty"`
