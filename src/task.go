@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"net/http"
+	"time"
 
 	"github.com/labstack/echo/v4"
 )
@@ -40,7 +41,8 @@ func postTaskHandler(c echo.Context) error {
 		return c.JSON(http.StatusBadRequest, map[string]string{"error": "Invalid request payload"})
 	}
 
-	res, err := db.Exec("INSERT INTO task (title, description, condition_id, difficulty, due_date, user) VALUES (?,?,?,?,?,?)", newTask.Title, newTask.Description, newTask.ConditionId, newTask.Difficulty, newTask.DueDate, userId)
+	dateOfNow := time.Now().Format("2006-01-02")
+	res, err := db.Exec("INSERT INTO task (user, title, description, condition_id, difficulty, created_at, updated_at, dueDate) VALUES (?,?,?,?,?,?)", userId, newTask.Title, newTask.Description, newTask.ConditionId, newTask.Difficulty, dateOfNow, dateOfNow, newTask.DueDate)
 
 	if err != nil {
 		fmt.Println(err)
