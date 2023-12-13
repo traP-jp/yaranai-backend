@@ -8,8 +8,12 @@ import (
 )
 
 func getConditionHandler(c echo.Context) error {
+	var payload AuthHeader
+	(&echo.DefaultBinder{}).BindHeaders(c, &payload)
+	userId := payload.UserId
+
 	var conditions []Condition
-	if err := db.Select(&conditions, "SELECT * FROM `condition`"); err != nil {
+	if err := db.Select(&conditions, "SELECT * FROM `condition` WHERE `user`=?", userId); err != nil {
 		fmt.Println(err)
 		return c.String(http.StatusInternalServerError, err.Error())
 	}
@@ -42,4 +46,36 @@ func postConditionHandler(c echo.Context) error {
 		return c.String(http.StatusInternalServerError, err.Error())
 	}
 	return c.JSON(http.StatusOK, condition)
+}
+
+func deleteConditionHandler(c echo.Context) error {
+	var payload AuthHeader
+	(&echo.DefaultBinder{}).BindHeaders(c, &payload)
+	userId := payload.UserId
+
+	deleteid := c.Param("id")
+	var condition Condition
+
+	
+	err := db.Get(&condition, "SELECT * FROM `condition` WHERE `condition_id` =?", deleteid)
+	if err != nil {
+		fmt.Println(err)
+		return c.String(http.StatusInternalServerError, err.Error())
+	}
+
+	//他ユーザーによる削除を制限
+	if condition.User!= userId {
+		return c.String(http.StatusForbidden, "Forbidden")
+	}
+
+	//消去実行
+	_, err = db.Exec("DELETE FROM `condition` WHERE `condition_id` =?", deleteid)
+
+	if err != nil {
+		fmt.Println(err)
+		return c.String(http.StatusInternalServerError, err.Error())
+	}
+
+	return c.JSON(http.StatusOK, condition)
+
 }

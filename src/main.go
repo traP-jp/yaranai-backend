@@ -59,6 +59,8 @@ func main() {
 
 	e.POST("/condition", postConditionHandler)
 
+	e.DELETE("/condition/:id", deleteConditionHandler)
+
 	e.Start(":8080")
 }
 func pingHandler(c echo.Context) error {
