@@ -54,6 +54,7 @@ func main() {
 	e.GET("/ping", pingHandler)
 	e.GET("/tasktest", getTaskTestHandler)
 	e.GET("/task", getTaskHandler)
+  	e.POST("/task", postTaskHandler)
 
 	e.GET("/condition", getConditionHandler)
 
