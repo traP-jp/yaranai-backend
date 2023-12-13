@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"net/http"
+	"strconv"
 
 	"github.com/labstack/echo/v4"
 )
@@ -52,19 +53,23 @@ func deleteConditionHandler(c echo.Context) error {
 	var payload AuthHeader
 	(&echo.DefaultBinder{}).BindHeaders(c, &payload)
 	userId := payload.UserId
-
-	deleteid := c.Param("id")
-	var condition Condition
-
 	
-	err := db.Get(&condition, "SELECT * FROM `condition` WHERE `condition_id` =?", deleteid)
+	//idのint変換
+	deleteidstr := c.Param("id")
+	deleteid, err := strconv.Atoi(deleteidstr)
+	if err!= nil {
+    return c.String(http.StatusBadRequest, err.Error())
+  }
+
+	var condition Condition
+	err = db.Get(&condition, "SELECT * FROM `condition` WHERE `condition_id` =?", deleteid)
 	if err != nil {
 		fmt.Println(err)
 		return c.String(http.StatusInternalServerError, err.Error())
 	}
 
 	//他ユーザーによる削除を制限
-	if condition.User!= userId {
+	if condition.User != userId {
 		return c.String(http.StatusForbidden, "Forbidden")
 	}
 
