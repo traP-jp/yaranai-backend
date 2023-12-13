@@ -54,6 +54,9 @@ func main() {
 	e.GET("/ping", pingHandler)
 	e.GET("/tasktest", getTaskTestHandler)
 	e.GET("/task", getTaskHandler)
+
+	e.GET("/condition", getConditionHandler)
+	
 	e.Start(":8080")
 }
 func pingHandler(c echo.Context) error {
