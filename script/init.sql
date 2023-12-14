@@ -1,6 +1,7 @@
 CREATE DATABASE IF NOT EXISTS `yaranai`;
 USE `yaranai`;
 CREATE USER yaranai IDENTIFIED BY 'password';
+GRANT ALL *.* TO yaranai;
 CREATE TABLE `task` (
   `user` text NOT NULL,
   `id` int(11) NOT NULL AUTO_INCREMENT,
@@ -18,6 +19,7 @@ CREATE TABLE `condition` (
   `condition` text NOT NULL,
   PRIMARY KEY (`condition_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
 CREATE TABLE IF NOT EXISTS `deleted_task` (
   `user` text NOT NULL,
   `id` int(11) NOT NULL AUTO_INCREMENT,

@@ -32,6 +32,11 @@ type TaskWithoutId struct {
 	DueDate     string `json:"dueDate" db:"dueDate"`
 }
 
+type Condition struct {
+	Id int `json:"id"`
+	Name string `json:"name"`
+
+
 // for suggestion
 type DeletedTask struct {
 	User          string    `json:"user" db:"user"`
@@ -48,4 +53,5 @@ type TimeSlotForClustering struct {
 	DeletedHourOfDay        int // 0 ~ 23
 	ConditionIds            []int
 	ConditionIdDistribution map[int]int
+
 }
