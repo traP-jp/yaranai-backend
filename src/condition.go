@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"net/http"
 	"strconv"
 
 	"github.com/labstack/echo/v4"
@@ -58,6 +59,56 @@ func postConditionHandler(c echo.Context) error {
 
 }
 
+func putConditionHandler(c echo.Context) error {
+	var payload AuthHeader
+	(&echo.DefaultBinder{}).BindHeaders(c, &payload)
+	userId := payload.UserId
+
+	//JSONリクエストボディのBind
+	conditionreq := &ConditionRequestBody{}
+	err := c.Bind(conditionreq)
+
+	if err != nil {
+		return c.JSON(http.StatusBadRequest, err)
+	}
+
+	//空白(0文字)状況登録の制限
+	if len(conditionreq.Name) == 0 {
+		return c.JSON(http.StatusBadRequest, "Name cannot be empty")
+	}
+
+	//idのint変換
+	putidstr := c.Param("id")
+	putid, err := strconv.Atoi(putidstr)
+	if err != nil {
+		return c.String(http.StatusBadRequest, err.Error())
+	}
+
+	//変更対象conditionの取得
+	var condition Condition
+	err = db.Get(&condition, "SELECT * FROM `condition` WHERE `condition_id` =?", putid)
+	if err != nil {
+		fmt.Println(err)
+		return c.String(http.StatusInternalServerError, err.Error())
+	}
+
+	//他ユーザーによる変更を制限
+	if condition.User != userId {
+		return c.String(http.StatusForbidden, "Forbidden")
+	}
+
+	//UPDATEの実行
+	_, err = db.Exec("UPDATE `condition` set `condition`=? WHERE `condition_id` =?", conditionreq.Name,putid)
+
+	if err != nil {
+		fmt.Println(err)
+		return c.String(http.StatusInternalServerError, err.Error())
+	}
+
+	return c.JSON(http.StatusOK, Condition{Id: condition.Id, Name: conditionreq.Name})
+
+}
+
 func deleteConditionHandler(c echo.Context) error {
 	var payload AuthHeader
 	(&echo.DefaultBinder{}).BindHeaders(c, &payload)
@@ -83,7 +134,7 @@ func deleteConditionHandler(c echo.Context) error {
 	}
 
 	//ユーザー情報はレスポンスに含まない
-	condition.User=""
+	condition.User = ""
 
 	//消去実行
 	_, err = db.Exec("DELETE FROM `condition` WHERE `condition_id` =?", deleteid)
@@ -96,4 +147,3 @@ func deleteConditionHandler(c echo.Context) error {
 	return c.JSON(http.StatusOK, condition)
 
 }
-

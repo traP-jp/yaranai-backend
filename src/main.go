@@ -57,9 +57,8 @@ func main() {
 	e.POST("/task", postTaskHandler)
 
 	e.GET("/condition", getConditionHandler)
-
 	e.POST("/condition", postConditionHandler)
-
+	e.PUT("/condition/:id", putConditionHandler)
 	e.DELETE("/condition/:id", deleteConditionHandler)
 
 
