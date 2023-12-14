@@ -31,11 +31,32 @@ type TaskWithoutId struct {
 	Difficulty  int    `json:"difficulty" db:"difficulty"`
 	DueDate     string `json:"dueDate" db:"dueDate"`
 }
+
 type Condition struct {
 	Id int `json:"id" db:"condition_id"`
 	User string `json:"user,omitempty" db:"user"`
 	Name string `json:"name,omitempty" db:"condition"`
 }
+
 type ConditionRequestBody struct {
 	Name string `json:"name,omitempty" db:"condition"`
+}
+
+// for suggestion
+type DeletedTask struct {
+	User          string    `json:"user" db:"user"`
+	Id            int       `json:"id" db:"id"`
+	ConditionId   int       `json:"condition_id" db:"condition_id"`
+	CreatedAt     time.Time `json:"created_at" db:"created_at"`
+	DueDate       time.Time `json:"due_date" db:"due_date"`
+	DeletedAtUnix int64     `json:"deleted_at_unix" db:"deleted_at_unix"`
+}
+
+// for suggestion
+type TimeSlotForClustering struct {
+	DeletedDayOfWeek        int // 0 ~ 6
+	DeletedHourOfDay        int // 0 ~ 23
+	ConditionIds            []int
+	ConditionIdDistribution map[int]int
+
 }

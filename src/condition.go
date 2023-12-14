@@ -2,7 +2,6 @@ package main
 
 import (
 	"fmt"
-	"net/http"
 	"strconv"
 
 	"github.com/labstack/echo/v4"
@@ -97,3 +96,4 @@ func deleteConditionHandler(c echo.Context) error {
 	return c.JSON(http.StatusOK, condition)
 
 }
+

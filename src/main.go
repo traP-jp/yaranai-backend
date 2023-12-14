@@ -62,6 +62,10 @@ func main() {
 
 	e.DELETE("/condition/:id", deleteConditionHandler)
 
+
+	e.PUT("/task/:id", putTaskHandler)
+	e.DELETE("/task/:id", deleteTaskHandler)
+
 	e.Start(":8080")
 }
 func pingHandler(c echo.Context) error {

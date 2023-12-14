@@ -1,8 +1,10 @@
 package main
 
 import (
+	"database/sql"
 	"fmt"
 	"net/http"
+	"strconv"
 	"time"
 
 	"github.com/labstack/echo/v4"
@@ -64,4 +66,81 @@ func postTaskHandler(c echo.Context) error {
 	}
 
 	return c.JSON(http.StatusCreated, addedTask)
+}
+
+func putTaskHandler(c echo.Context) error {
+	var payload AuthHeader
+	(&echo.DefaultBinder{}).BindHeaders(c, &payload)
+	userId := payload.UserId
+
+	taskId, err := strconv.Atoi(c.Param("id"))
+	if err != nil {
+		return c.JSON(http.StatusBadRequest, map[string]string{"error": "Invalid task ID"})
+	}
+
+	var imformationOfTask TaskWithoutId
+	if err := c.Bind(&imformationOfTask); err != nil {
+		return c.JSON(http.StatusBadRequest, map[string]string{"error": "Invalid request payload"})
+	}
+
+	var existingTask Task
+	err = db.Get(&existingTask, "SELECT * FROM task WHERE id = ? AND user = ?", taskId, userId)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			return c.JSON(http.StatusNotFound, map[string]string{"error": "Task not found"})
+		} else {
+			fmt.Println(err)
+			return c.JSON(http.StatusInternalServerError, map[string]string{"error": "Failed to retrieve task"})
+		}
+	}
+
+	dateOfNow := time.Now().Format("2006-01-02")
+	_, err = db.Exec("UPDATE task SET title=?, description=?, condition_id=?, difficulty=?, updated_at=?, dueDate=? WHERE id=? AND user=?", imformationOfTask.Title, imformationOfTask.Description, imformationOfTask.ConditionId, imformationOfTask.Difficulty, dateOfNow, imformationOfTask.DueDate, taskId, userId)
+
+	if err != nil {
+		fmt.Println(err)
+		return c.JSON(http.StatusInternalServerError, map[string]string{"error": "Failed to update task"})
+	}
+
+	imformationOfTaskRes := TaskRes{
+		Id:          taskId,
+		Title:       imformationOfTask.Title,
+		Description: imformationOfTask.Description,
+		ConditionId: imformationOfTask.ConditionId,
+		Difficulty:  imformationOfTask.Difficulty,
+		DueDate:     imformationOfTask.DueDate,
+	}
+
+	return c.JSON(http.StatusOK, imformationOfTaskRes)
+}
+
+func deleteTaskHandler(c echo.Context) error {
+	var payload AuthHeader
+	(&echo.DefaultBinder{}).BindHeaders(c, &payload)
+	userId := payload.UserId
+
+	taskId := c.Param("id")
+
+	var task Task
+	if err := db.Get(&task, "SELECT * FROM task WHERE id = ?", taskId); err != nil {
+		fmt.Println(err)
+		return c.JSON(http.StatusInternalServerError, map[string]string{"error": "Failed to get task"})
+	}
+	if task.User != userId {
+		return c.JSON(http.StatusUnauthorized, map[string]string{"error": "This task is not yours"})
+	}
+
+	_, err := db.Exec("DELETE FROM task WHERE id = ?", taskId)
+	if err != nil {
+		fmt.Println(err)
+		return c.JSON(http.StatusInternalServerError, map[string]string{"error": "Failed to delete task"})
+	}
+	return c.JSON(http.StatusOK, TaskRes{
+		Id:          task.Id,
+		Title:       task.Title,
+		Description: task.Description,
+		ConditionId: task.ConditionId,
+		Difficulty:  task.Difficulty,
+		DueDate:     task.DueDate.Format("2006-01-02"),
+	})
 }
