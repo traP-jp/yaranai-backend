@@ -14,7 +14,7 @@ func getConditionHandler(c echo.Context) error {
 	userId := payload.UserId
 
 	var conditions []Condition
-	if err := db.Select(&conditions, "SELECT * FROM `condition` WHERE `user`=?", userId); err != nil {
+	if err := db.Select(&conditions, "SELECT `condition_id`, `condition` FROM `condition` WHERE `user`=?", userId); err != nil {
 		fmt.Println(err)
 		return c.String(http.StatusInternalServerError, err.Error())
 	}
@@ -82,6 +82,9 @@ func deleteConditionHandler(c echo.Context) error {
 	if condition.User != userId {
 		return c.String(http.StatusForbidden, "Forbidden")
 	}
+
+	//ユーザー情報はレスポンスに含まない
+	condition.User=""
 
 	//消去実行
 	_, err = db.Exec("DELETE FROM `condition` WHERE `condition_id` =?", deleteid)
