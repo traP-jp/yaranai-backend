@@ -1,7 +1,7 @@
 CREATE DATABASE IF NOT EXISTS `yaranai`;
 USE `yaranai`;
 CREATE USER yaranai IDENTIFIED BY 'password';
-grant all on *.* to yaranai;
+GRANT ALL *.* to yaranai;
 CREATE TABLE `task` (
   `user` text NOT NULL,
   `id` int(11) NOT NULL AUTO_INCREMENT,
