@@ -33,9 +33,9 @@ type TaskWithoutId struct {
 }
 
 type Condition struct {
-	Id int `json:"id"`
+	Id   int    `json:"id"`
 	Name string `json:"name"`
-
+}
 
 // for suggestion
 type DeletedTask struct {
@@ -53,5 +53,4 @@ type TimeSlotForClustering struct {
 	DeletedHourOfDay        int // 0 ~ 23
 	ConditionIds            []int
 	ConditionIdDistribution map[int]int
-
 }
