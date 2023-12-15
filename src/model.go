@@ -33,13 +33,13 @@ type TaskWithoutId struct {
 }
 
 type Condition struct {
-	Id int `json:"id" db:"condition_id"`
+	Id   int    `json:"id" db:"condition_id"`
 	User string `json:"user" db:"user"`
 	Name string `json:"name" db:"condition"`
 }
 
 type ConditionWithoutUser struct {
-	Id int `json:"id" db:"condition_id"`
+	Id   int    `json:"id" db:"condition_id"`
 	Name string `json:"name" db:"condition"`
 }
 
@@ -63,5 +63,4 @@ type TimeSlotForClustering struct {
 	DeletedHourOfDay        int // 0 ~ 23
 	ConditionIds            []int
 	ConditionIdDistribution map[int]int
-
 }
