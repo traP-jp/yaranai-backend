@@ -59,6 +59,7 @@ type DeletedTask struct {
 
 // for suggestion
 type TimeSlotForClustering struct {
+	UUID                    string
 	DeletedDayOfWeek        int // 0 ~ 6
 	DeletedHourOfDay        int // 0 ~ 23
 	ConditionIds            []int
