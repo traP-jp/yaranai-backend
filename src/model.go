@@ -34,12 +34,17 @@ type TaskWithoutId struct {
 
 type Condition struct {
 	Id int `json:"id" db:"condition_id"`
-	User string `json:"user,omitempty" db:"user"`
-	Name string `json:"name,omitempty" db:"condition"`
+	User string `json:"user" db:"user"`
+	Name string `json:"name" db:"condition"`
+}
+
+type ConditionWithoutUser struct {
+	Id int `json:"id" db:"condition_id"`
+	Name string `json:"name" db:"condition"`
 }
 
 type ConditionRequestBody struct {
-	Name string `json:"name,omitempty" db:"condition"`
+	Name string `json:"name" db:"condition"`
 }
 
 // for suggestion

@@ -13,10 +13,10 @@ func getConditionHandler(c echo.Context) error {
 	(&echo.DefaultBinder{}).BindHeaders(c, &payload)
 	userId := payload.UserId
 
-	var conditions []Condition
+	var conditions []ConditionWithoutUser
 	if err := db.Select(&conditions, "SELECT `condition_id`, `condition` FROM `condition` WHERE `user`=?", userId); err != nil {
 		fmt.Println(err)
-		return c.String(http.StatusInternalServerError, err.Error())
+		return c.String(http.StatusNotFound, err.Error())
 	}
 	return c.JSON(http.StatusOK, conditions)
 }
@@ -31,7 +31,7 @@ func postConditionHandler(c echo.Context) error {
 	err := c.Bind(conditionreq)
 
 	if err != nil {
-		return c.JSON(http.StatusBadRequest, err)
+		return c.JSON(http.StatusBadRequest, map[string]string{"error": "Invalid request payload"})
 	}
 
 	//空白(0文字)状況登録の制限
@@ -43,7 +43,7 @@ func postConditionHandler(c echo.Context) error {
 
 	if err != nil {
 		fmt.Println(err)
-		return c.String(http.StatusInternalServerError, err.Error())
+		return c.JSON(http.StatusInternalServerError, map[string]string{"error": "Failed to add condition"})
 	}
 
 	//追加した状況のcondition_idを取得
@@ -51,7 +51,7 @@ func postConditionHandler(c echo.Context) error {
 	err = db.Get(&condition, "SELECT `condition_id` FROM `condition` WHERE `condition` = ? ORDER BY `condition_id` DESC", conditionreq.Name)
 	if err != nil {
 		fmt.Println(err)
-		return c.String(http.StatusInternalServerError, err.Error())
+		return c.JSON(http.StatusInternalServerError, map[string]string{"error": "Failed to get condition ID"})
 	}
 
 	conditionstr := strconv.Itoa(condition)
@@ -69,7 +69,7 @@ func putConditionHandler(c echo.Context) error {
 	err := c.Bind(conditionreq)
 
 	if err != nil {
-		return c.JSON(http.StatusBadRequest, err)
+		return c.JSON(http.StatusBadRequest, map[string]string{"error": "Invalid request payload"})
 	}
 
 	//空白(0文字)状況登録の制限
@@ -94,7 +94,7 @@ func putConditionHandler(c echo.Context) error {
 
 	//他ユーザーによる変更を制限
 	if condition.User != userId {
-		return c.String(http.StatusForbidden, "Forbidden")
+		return c.JSON(http.StatusUnauthorized, map[string]string{"error": "This condition is not yours"})
 	}
 
 	//UPDATEの実行
@@ -102,10 +102,10 @@ func putConditionHandler(c echo.Context) error {
 
 	if err != nil {
 		fmt.Println(err)
-		return c.String(http.StatusInternalServerError, err.Error())
+		return c.JSON(http.StatusInternalServerError, map[string]string{"error": "Failed to rename condition"})
 	}
 
-	return c.JSON(http.StatusOK, Condition{Id: condition.Id, Name: conditionreq.Name})
+	return c.JSON(http.StatusOK, ConditionWithoutUser{Id: condition.Id, Name: conditionreq.Name})
 
 }
 
@@ -125,25 +125,22 @@ func deleteConditionHandler(c echo.Context) error {
 	err = db.Get(&condition, "SELECT * FROM `condition` WHERE `condition_id` =?", deleteid)
 	if err != nil {
 		fmt.Println(err)
-		return c.String(http.StatusInternalServerError, err.Error())
+		return c.JSON(http.StatusNotFound, map[string]string{"error": "Failed to find condition"})
 	}
 
 	//他ユーザーによる削除を制限
 	if condition.User != userId {
-		return c.String(http.StatusForbidden, "Forbidden")
+		return c.JSON(http.StatusUnauthorized, map[string]string{"error": "This condition is not yours"})
 	}
-
-	//ユーザー情報はレスポンスに含まない
-	condition.User = ""
 
 	//消去実行
 	_, err = db.Exec("DELETE FROM `condition` WHERE `condition_id` =?", deleteid)
 
 	if err != nil {
 		fmt.Println(err)
-		return c.String(http.StatusInternalServerError, err.Error())
+		return c.JSON(http.StatusInternalServerError, map[string]string{"error": "Failed to delete condition"})
 	}
 
-	return c.JSON(http.StatusOK, condition)
+	return c.JSON(http.StatusOK, ConditionWithoutUser{Id: condition.Id, Name: condition.Name})
 
 }
