@@ -65,7 +65,7 @@ func getProbabilityOfNow(clusters [][]TimeSlotForClustering, condition_ids []int
 				count_of_cases += count
 			}
 		}
-		for condition_id, _ := range probabilities {
+		for condition_id := range probabilities {
 			probabilities[condition_id] /= float64(count_of_cases)
 		}
 	}
@@ -108,7 +108,7 @@ func getTimeSlotsForClustering(user string) (time_slots_for_clustering []TimeSlo
 	}
 	// construct []int from unordered set
 	condition_ids_slice := make([]int, 0)
-	for condition_id, _ := range condition_ids {
+	for condition_id := range condition_ids {
 		condition_ids_slice = append(condition_ids_slice, condition_id)
 	}
 	// for each time slot, count the number of tasks with each condition id
