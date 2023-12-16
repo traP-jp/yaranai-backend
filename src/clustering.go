@@ -1,7 +1,9 @@
 package main
 
 import (
+	"database/sql"
 	"math"
+	"time"
 
 	"github.com/sohlich/go-dbscan"
 )
@@ -34,4 +36,100 @@ func clusterize(time_slots_for_clustering []TimeSlotForClustering) [][]TimeSlotF
 		}
 	}
 	return clusterized_time_slots_for_clustering
+}
+
+func getProbabilityOfNow(clusters [][]TimeSlotForClustering, condition_ids []int) map[int]float64 {
+	now := time.Now()
+	day_of_week := now.Weekday()
+	hour_of_day := now.Hour()
+	// find cluster which contains now
+	var cluster []TimeSlotForClustering = nil
+	for _, c := range clusters {
+		for _, time_slot_for_clustering := range c {
+			if time_slot_for_clustering.DeletedDayOfWeek == int(day_of_week) && time_slot_for_clustering.DeletedHourOfDay == int(hour_of_day) {
+				cluster = c
+				break
+			}
+		}
+	}
+	probabilities := make(map[int]float64)
+	if cluster == nil {
+		for _, condition_id := range condition_ids {
+			probabilities[condition_id] = 1.0 / float64(len(condition_ids))
+		}
+	} else {
+		count_of_cases := 0
+		for _, time_slot_for_clustering := range cluster {
+			for condition_id, count := range time_slot_for_clustering.ConditionIdDistribution {
+				probabilities[condition_id] += float64(count)
+				count_of_cases += count
+			}
+		}
+		for condition_id, _ := range probabilities {
+			probabilities[condition_id] /= float64(count_of_cases)
+		}
+	}
+	return probabilities
+}
+
+func getTimeSlotsForClustering(user string) (time_slots_for_clustering []TimeSlotForClustering, err error) {
+	// connect to database as root@localhost and open deleted_task table
+	db, err := sql.Open("mysql", "root@tcp(localhost:3306)/deleted_task")
+	if err != nil {
+		return
+	}
+	defer db.Close()
+	// select all deleted_task with user
+	rows, err := db.Query("SELECT * FROM deleted_task WHERE user = ?", user)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var deleted_task_properties []DeletedTask
+	for rows.Next() {
+		var deleted_task_property DeletedTask
+		err = rows.Scan(
+			&deleted_task_property.User,
+			&deleted_task_property.Id,
+			&deleted_task_property.ConditionId,
+			&deleted_task_property.CreatedAt,
+			&deleted_task_property.DueDate,
+			&deleted_task_property.DeletedAtUnix,
+		)
+		if err != nil {
+			return nil, err
+		}
+		deleted_task_properties = append(deleted_task_properties, deleted_task_property)
+	}
+	// accumulate all condition ids in unordered set
+	condition_ids := make(map[int]bool)
+	for _, deleted_task_property := range deleted_task_properties {
+		condition_ids[deleted_task_property.ConditionId] = true
+	}
+	// construct []int from unordered set
+	condition_ids_slice := make([]int, 0)
+	for condition_id, _ := range condition_ids {
+		condition_ids_slice = append(condition_ids_slice, condition_id)
+	}
+	// for each time slot, count the number of tasks with each condition id
+	condition_ids_distribution := make(map[int]map[int]map[int]int)
+	for _, deleted_task_property := range deleted_task_properties {
+		deleted_time := deleted_task_property.DeletedAtUnix
+		deleted_day_of_week := time.Unix(deleted_time, 0).Weekday()
+		deleted_hour_of_day := time.Unix(deleted_time, 0).Hour()
+		condition_ids_distribution[int(deleted_day_of_week)][int(deleted_hour_of_day)][deleted_task_property.ConditionId]++
+	}
+	// construct []TimeSlotForClustering
+	time_slots := make([]TimeSlotForClustering, 0)
+	for day := 0; day < 7; day++ {
+		for hour := 0; hour < 24; hour++ {
+			time_slots = append(time_slots, TimeSlotForClustering{
+				DeletedDayOfWeek:        day,
+				DeletedHourOfDay:        hour,
+				ConditionIds:            condition_ids_slice,
+				ConditionIdDistribution: condition_ids_distribution[day][hour],
+			})
+		}
+	}
+	return time_slots, nil
 }
