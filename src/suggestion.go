@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"fmt"
 	"os"
+	"sort"
 )
 
 func suggest(user string) ([]Task, error) {
@@ -91,11 +92,33 @@ func suggestInternal(user string, tasks []Task) ([]Task, error) {
 		condition_ids_unique[task.ConditionId] = true
 	}
 	condition_ids := make([]int, 0)
-	for condition_id, _ := range condition_ids_unique {
+	for condition_id := range condition_ids_unique {
 		condition_ids = append(condition_ids, condition_id)
 	}
 	probabilities := getProbabilityOfNow(clusters, condition_ids)
 	// set task preferences
-
-	return nil, nil
+	type SortStruct struct {
+		task       Task
+		preference float64
+	}
+	sort_structs := make([]SortStruct, 0)
+	for _, task := range tasks {
+		probability_of_condition := probabilities[task.ConditionId]
+		preference := taskPreference(task, probability_of_condition)
+		sort_struct := SortStruct{
+			task:       task,
+			preference: preference,
+		}
+		sort_structs = append(sort_structs, sort_struct)
+	}
+	// sort by preference
+	sort.Slice(sort_structs, func(i, j int) bool {
+		return sort_structs[i].preference > sort_structs[j].preference
+	})
+	// get sorted tasks
+	tasks_sorted_by_preference := make([]Task, 0)
+	for _, sort_struct := range sort_structs {
+		tasks_sorted_by_preference = append(tasks_sorted_by_preference, sort_struct.task)
+	}
+	return tasks_sorted_by_preference, nil
 }
