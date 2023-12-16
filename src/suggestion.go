@@ -6,46 +6,47 @@ import (
 	"time"
 )
 
-func Suggest(user string) (tasks []Task, err error) {
-	// now := time.Now()
-	// connect to database as root@localhost and open deleted_task table
-	db, err := sql.Open("mysql", "yaranai@tcp(localhost:3306)/deleted_task")
-	if err != nil {
-		return
-	}
-	defer db.Close()
-	// select all deleted_task with user
-	rows, err := db.Query("SELECT * FROM deleted_task WHERE user = ?", user)
-	if err != nil {
-		return nil, err
-	}
-	defer rows.Close()
-	var deleted_task_properties []DeletedTask
-	for rows.Next() {
-		var deleted_task_property DeletedTask
-		err = rows.Scan(
-			&deleted_task_property.User,
-			&deleted_task_property.Id,
-			&deleted_task_property.ConditionId,
-			&deleted_task_property.CreatedAt,
-			&deleted_task_property.DueDate,
-			&deleted_task_property.DeletedAtUnix,
-		)
+/*
+	func Suggest(user string) (tasks []Task, err error) {
+		// now := time.Now()
+		// connect to database as root@localhost and open deleted_task table
+		db, err := sql.Open("mysql", "yaranai@tcp(localhost:3306)/deleted_task")
+		if err != nil {
+			return
+		}
+		defer db.Close()
+		// select all deleted_task with user
+		rows, err := db.Query("SELECT * FROM deleted_task WHERE user = ?", user)
 		if err != nil {
 			return nil, err
 		}
-		deleted_task_properties = append(deleted_task_properties, deleted_task_property)
+		defer rows.Close()
+		var deleted_task_properties []DeletedTask
+		for rows.Next() {
+			var deleted_task_property DeletedTask
+			err = rows.Scan(
+				&deleted_task_property.User,
+				&deleted_task_property.Id,
+				&deleted_task_property.ConditionId,
+				&deleted_task_property.CreatedAt,
+				&deleted_task_property.DueDate,
+				&deleted_task_property.DeletedAtUnix,
+			)
+			if err != nil {
+				return nil, err
+			}
+			deleted_task_properties = append(deleted_task_properties, deleted_task_property)
+		}
+		// get time slots for clustering
+		time_slots_for_clustering, err := getTimeSlotsForClustering(user)
+		if err != nil {
+			return nil, err
+		}
+		// clustering
+		clusters := clusterize(time_slots_for_clustering)
+		return nil, nil
 	}
-	// get time slots for clustering
-	time_slots_for_clustering, err := getTimeSlotsForClustering(user)
-	if err != nil {
-		return nil, err
-	}
-	// clustering
-	clusters := clusterize(time_slots_for_clustering)
-	return
-}
-
+*/
 func getTimeSlotsForClustering(user string) (time_slots_for_clustering []TimeSlotForClustering, err error) {
 	// connect to database as root@localhost and open deleted_task table
 	db, err := sql.Open("mysql", "root@tcp(localhost:3306)/deleted_task")
