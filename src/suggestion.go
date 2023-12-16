@@ -1,14 +1,16 @@
 package main
 
 import (
-	"database/sql"
 	"fmt"
 	"os"
 	"sort"
+
+	"github.com/go-sql-driver/mysql"
+	"github.com/jmoiron/sqlx"
 )
 
-func suggest(user string) ([]Task, error) {
-	db, err := sql.Open("mysql", "yaranai@localhost/deleted_task")
+func suggest(user string, conf mysql.Config) ([]Task, error) {
+	db, err := sqlx.Open("mysql", conf.FormatDSN())
 	if err != nil {
 		return nil, err
 	}
@@ -38,20 +40,18 @@ func suggest(user string) ([]Task, error) {
 		}
 		tasks = append(tasks, task)
 	}
-	tasks_sorted_by_preference, err := suggestInternal(user, tasks)
+	tasks_sorted_by_preference, err := suggestInternal(user, conf, tasks)
 	if err != nil {
 		// if error occurs, stderr error message and return tasks_not_sorted
 		fmt.Fprintln(os.Stderr, err)
-		return tasks, nil
+		return tasks, err
 	} else {
 		return tasks_sorted_by_preference, nil
 	}
 }
 
-func suggestInternal(user string, tasks []Task) ([]Task, error) {
-	// now := time.Now()
-	// connect to database as root@localhost and open deleted_task table
-	db, err := sql.Open("mysql", "yaranai@localhost/deleted_task")
+func suggestInternal(user string, conf mysql.Config, tasks []Task) ([]Task, error) {
+	db, err := sqlx.Open("mysql", conf.FormatDSN())
 	if err != nil {
 		return nil, err
 	}
@@ -62,24 +62,24 @@ func suggestInternal(user string, tasks []Task) ([]Task, error) {
 		return nil, err
 	}
 	defer rows.Close()
-	var deleted_task_properties []DeletedTask
+	var deleted_tasks []DeletedTask
 	for rows.Next() {
-		var deleted_task_property DeletedTask
+		var deleted_task DeletedTask
 		err = rows.Scan(
-			&deleted_task_property.User,
-			&deleted_task_property.Id,
-			&deleted_task_property.ConditionId,
-			&deleted_task_property.CreatedAt,
-			&deleted_task_property.DueDate,
-			&deleted_task_property.DeletedAtUnix,
+			&deleted_task.User,
+			&deleted_task.Id,
+			&deleted_task.ConditionId,
+			&deleted_task.CreatedAt,
+			&deleted_task.DueDate,
+			&deleted_task.DeletedAtUnix,
 		)
 		if err != nil {
 			return nil, err
 		}
-		deleted_task_properties = append(deleted_task_properties, deleted_task_property)
+		deleted_tasks = append(deleted_tasks, deleted_task)
 	}
 	// get time slots for clustering
-	time_slots_for_clustering, err := getTimeSlotsForClustering(user)
+	time_slots_for_clustering, err := getTimeSlotsForClustering(user, deleted_tasks)
 	if err != nil {
 		return nil, err
 	}

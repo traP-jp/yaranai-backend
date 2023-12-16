@@ -1,7 +1,6 @@
 package main
 
 import (
-	"database/sql"
 	"math"
 	"time"
 
@@ -72,38 +71,11 @@ func getProbabilityOfNow(clusters [][]TimeSlotForClustering, condition_ids []int
 	return probabilities
 }
 
-func getTimeSlotsForClustering(user string) (time_slots_for_clustering []TimeSlotForClustering, err error) {
-	// connect to database as root@localhost and open deleted_task table
-	db, err := sql.Open("mysql", "root@tcp(localhost:3306)/deleted_task")
-	if err != nil {
-		return
-	}
-	defer db.Close()
-	// select all deleted_task with user
-	rows, err := db.Query("SELECT * FROM deleted_task WHERE user = ?", user)
-	if err != nil {
-		return nil, err
-	}
-	defer rows.Close()
-	var deleted_task_properties []DeletedTask
-	for rows.Next() {
-		var deleted_task_property DeletedTask
-		err = rows.Scan(
-			&deleted_task_property.User,
-			&deleted_task_property.Id,
-			&deleted_task_property.ConditionId,
-			&deleted_task_property.CreatedAt,
-			&deleted_task_property.DueDate,
-			&deleted_task_property.DeletedAtUnix,
-		)
-		if err != nil {
-			return nil, err
-		}
-		deleted_task_properties = append(deleted_task_properties, deleted_task_property)
-	}
+func getTimeSlotsForClustering(user string, deleted_tasks []DeletedTask) (time_slots_for_clustering []TimeSlotForClustering, err error) {
+
 	// accumulate all condition ids in unordered set
 	condition_ids := make(map[int]bool)
-	for _, deleted_task_property := range deleted_task_properties {
+	for _, deleted_task_property := range deleted_tasks {
 		condition_ids[deleted_task_property.ConditionId] = true
 	}
 	// construct []int from unordered set
@@ -113,7 +85,7 @@ func getTimeSlotsForClustering(user string) (time_slots_for_clustering []TimeSlo
 	}
 	// for each time slot, count the number of tasks with each condition id
 	condition_ids_distribution := make(map[int]map[int]map[int]int)
-	for _, deleted_task_property := range deleted_task_properties {
+	for _, deleted_task_property := range deleted_tasks {
 		deleted_time := deleted_task_property.DeletedAtUnix
 		deleted_day_of_week := time.Unix(deleted_time, 0).Weekday()
 		deleted_hour_of_day := time.Unix(deleted_time, 0).Hour()
