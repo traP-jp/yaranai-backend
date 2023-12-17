@@ -63,6 +63,8 @@ func main() {
 	e.PUT("/condition/:id", putConditionHandler)
 	e.DELETE("/condition/:id", deleteConditionHandler)
 
+	e.GET("/suggest", getSuggestHandler)
+
 	e.Start(":8080")
 }
 func pingHandler(c echo.Context) error {
