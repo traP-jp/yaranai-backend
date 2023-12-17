@@ -4,6 +4,7 @@ import (
 	"math"
 	"time"
 
+	"github.com/google/uuid"
 	"github.com/sohlich/go-dbscan"
 )
 
@@ -98,6 +99,7 @@ func getTimeSlotsForClustering(user string, deleted_tasks []DeletedTask) (time_s
 			time_slots = append(time_slots, TimeSlotForClustering{
 				DeletedDayOfWeek:        day,
 				DeletedHourOfDay:        hour,
+				UUID:                    uuid.New().String(),
 				ConditionIds:            condition_ids_slice,
 				ConditionIdDistribution: condition_ids_distribution[day][hour],
 			})
