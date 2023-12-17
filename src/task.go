@@ -149,7 +149,7 @@ func deleteTaskHandler(c echo.Context) error {
 	_, err = db.Exec("INSERT INTO deletd_task (user, id, condition_id, created_at, due_date, deleted_at_unix) VALUES (?,?,?,?,?,?)", deleting_task.User, deleting_task.Id, deleting_task.ConditionId, deleting_task.CreatedAt, deleting_task.DueDate, deleting_task.DeletedAtUnix)
 	if err != nil {
 		fmt.Println(err)
-		return c.JSON(http.StatusInternalServerError, map[string]string{"error": "Failed to add deleted task"})
+		return c.JSON(http.StatusInternalServerError, map[string]string{"error": "Failed to execute database query"})
 	}
 
 	return c.JSON(http.StatusOK, TaskRes{
