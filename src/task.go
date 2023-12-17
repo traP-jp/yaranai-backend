@@ -14,11 +14,11 @@ func getTaskHandler(c echo.Context) error {
 	var payload AuthHeader
 	(&echo.DefaultBinder{}).BindHeaders(c, &payload)
 	userId := payload.UserId
-	var tasks []Task
+	tasks :=[]Task{}
 	if err := db.Select(&tasks, "SELECT * FROM task WHERE user = ?", userId); err != nil {
 		fmt.Println(err)
 	}
-	var res []TaskRes
+	res :=[]TaskRes{}
 	for _, v := range tasks {
 		res = append(res, TaskRes{
 			Id:          v.Id,
