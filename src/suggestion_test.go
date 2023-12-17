@@ -8,10 +8,11 @@ import (
 	"time"
 
 	"github.com/go-sql-driver/mysql"
+	"github.com/jmoiron/sqlx"
 	"github.com/joho/godotenv"
 )
 
-func TestSuggest(t *testing.T) {
+func dbInit() {
 	jst, err := time.LoadLocation("Asia/Tokyo")
 	if err != nil {
 		log.Fatal(err)
@@ -35,7 +36,19 @@ func TestSuggest(t *testing.T) {
 		Loc:                  jst,
 		AllowNativePasswords: true,
 	}
-	task, err := suggest("ramdos", conf)
+
+	_db, err := sqlx.Open("mysql", conf.FormatDSN())
+
+	if err != nil {
+		log.Fatal(err)
+	}
+	fmt.Println("conntected")
+	db = _db
+}
+
+func TestSuggest(t *testing.T) {
+	dbInit()
+	task, err := suggest("ramdos")
 	if err != nil {
 		t.Errorf("unexpected error: %v", err)
 	}

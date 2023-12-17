@@ -4,18 +4,16 @@ import (
 	"fmt"
 	"os"
 	"sort"
-
-	"github.com/go-sql-driver/mysql"
 )
 
-func suggest(user string, conf mysql.Config) ([]Task, error) {
+func suggest(user string) ([]Task, error) {
 	// get all tasks with user
 	var tasks []Task
 	err := db.Select(&tasks, "SELECT * FROM task WHERE user = ?", user)
 	if err != nil {
 		return nil, err
 	}
-	tasks_sorted_by_preference, err := suggestInternal(user, conf, tasks)
+	tasks_sorted_by_preference, err := suggestInternal(user, tasks)
 	if err != nil {
 		// if error occurs, stderr error message and return tasks_not_sorted
 		fmt.Fprintln(os.Stderr, err)
@@ -25,7 +23,7 @@ func suggest(user string, conf mysql.Config) ([]Task, error) {
 	}
 }
 
-func suggestInternal(user string, conf mysql.Config, tasks []Task) ([]Task, error) {
+func suggestInternal(user string, tasks []Task) ([]Task, error) {
 
 	// select all deleted_task with user
 	var deleted_tasks []DeletedTask
