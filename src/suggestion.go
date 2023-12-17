@@ -6,18 +6,25 @@ import (
 	"sort"
 )
 
-func suggest(user string) ([]Task, error) {
+func suggest(user string, max_difficulty int) ([]Task, error) {
 	// get all tasks with user
 	var tasks []Task
 	err := db.Select(&tasks, "SELECT * FROM task WHERE user = ?", user)
 	if err != nil {
 		return nil, err
 	}
-	tasks_sorted_by_preference, err := suggestInternal(user, tasks)
+	tasks_with_valid_difficulty := make([]Task, 0)
+	for _, task := range tasks {
+		if task.Difficulty <= max_difficulty {
+			tasks_with_valid_difficulty = append(tasks_with_valid_difficulty, task)
+		}
+	}
+
+	tasks_sorted_by_preference, err := suggestInternal(user, tasks_with_valid_difficulty)
 	if err != nil {
 		// if error occurs, stderr error message and return tasks_not_sorted
 		fmt.Fprintln(os.Stderr, err)
-		return tasks, err
+		return tasks_with_valid_difficulty, nil
 	} else {
 		return tasks_sorted_by_preference, nil
 	}
