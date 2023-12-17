@@ -6,39 +6,14 @@ import (
 	"sort"
 
 	"github.com/go-sql-driver/mysql"
-	"github.com/jmoiron/sqlx"
 )
 
 func suggest(user string, conf mysql.Config) ([]Task, error) {
-	db, err := sqlx.Open("mysql", conf.FormatDSN())
-	if err != nil {
-		return nil, err
-	}
-	defer db.Close()
 	// get all tasks with user
-	rows, err := db.Query("SELECT * FROM task WHERE user = ?", user)
+	var tasks []Task
+	err := db.Select(&tasks, "SELECT * FROM task WHERE user = ?", user)
 	if err != nil {
 		return nil, err
-	}
-	defer rows.Close()
-	var tasks []Task
-	for rows.Next() {
-		var task Task
-		err = rows.Scan(
-			&task.User,
-			&task.Id,
-			&task.Title,
-			&task.Description,
-			&task.ConditionId,
-			&task.Difficulty,
-			&task.CreatedAt,
-			&task.UpdatedAt,
-			&task.DueDate,
-		)
-		if err != nil {
-			return nil, err
-		}
-		tasks = append(tasks, task)
 	}
 	tasks_sorted_by_preference, err := suggestInternal(user, conf, tasks)
 	if err != nil {
@@ -51,33 +26,10 @@ func suggest(user string, conf mysql.Config) ([]Task, error) {
 }
 
 func suggestInternal(user string, conf mysql.Config, tasks []Task) ([]Task, error) {
-	db, err := sqlx.Open("mysql", conf.FormatDSN())
-	if err != nil {
-		return nil, err
-	}
-	defer db.Close()
+
 	// select all deleted_task with user
-	rows, err := db.Query("SELECT * FROM deleted_task WHERE user = ?", user)
-	if err != nil {
-		return nil, err
-	}
-	defer rows.Close()
 	var deleted_tasks []DeletedTask
-	for rows.Next() {
-		var deleted_task DeletedTask
-		err = rows.Scan(
-			&deleted_task.User,
-			&deleted_task.Id,
-			&deleted_task.ConditionId,
-			&deleted_task.CreatedAt,
-			&deleted_task.DueDate,
-			&deleted_task.DeletedAtUnix,
-		)
-		if err != nil {
-			return nil, err
-		}
-		deleted_tasks = append(deleted_tasks, deleted_task)
-	}
+	err := db.Select(&deleted_tasks, "SELECT * FROM deleted_task WHERE user = ?", user)
 	// get time slots for clustering
 	time_slots_for_clustering, err := getTimeSlotsForClustering(user, deleted_tasks)
 	if err != nil {
