@@ -13,7 +13,7 @@ func getConditionHandler(c echo.Context) error {
 	(&echo.DefaultBinder{}).BindHeaders(c, &payload)
 	userId := payload.UserId
 
-	var conditions []ConditionWithoutUser
+	conditions := []ConditionWithoutUser{}
 	if err := db.Select(&conditions, "SELECT `condition_id`, `condition` FROM `condition` WHERE `user`=?", userId); err != nil {
 		fmt.Println(err)
 		return c.String(http.StatusNotFound, err.Error())
@@ -98,7 +98,7 @@ func putConditionHandler(c echo.Context) error {
 	}
 
 	//UPDATEの実行
-	_, err = db.Exec("UPDATE `condition` set `condition`=? WHERE `condition_id` =?", conditionreq.Name,putid)
+	_, err = db.Exec("UPDATE `condition` set `condition`=? WHERE `condition_id` =?", conditionreq.Name, putid)
 
 	if err != nil {
 		fmt.Println(err)
