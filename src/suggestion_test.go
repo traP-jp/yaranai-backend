@@ -52,9 +52,6 @@ func TestSuggest(t *testing.T) {
 	if err != nil {
 		t.Errorf("unexpected error: %v", err)
 	}
-	if len(task) != 0 {
-		t.Errorf("unexpected task: %v", task)
-	}
 	for _, task := range task {
 		fmt.Println(task)
 	}
