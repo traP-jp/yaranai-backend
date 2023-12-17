@@ -14,11 +14,11 @@ func getTaskHandler(c echo.Context) error {
 	var payload AuthHeader
 	(&echo.DefaultBinder{}).BindHeaders(c, &payload)
 	userId := payload.UserId
-	tasks :=[]Task{}
+	tasks := []Task{}
 	if err := db.Select(&tasks, "SELECT * FROM task WHERE user = ?", userId); err != nil {
 		fmt.Println(err)
 	}
-	res :=[]TaskRes{}
+	res := []TaskRes{}
 	for _, v := range tasks {
 		res = append(res, TaskRes{
 			Id:          v.Id,
@@ -135,6 +135,23 @@ func deleteTaskHandler(c echo.Context) error {
 		fmt.Println(err)
 		return c.JSON(http.StatusInternalServerError, map[string]string{"error": "Failed to delete task"})
 	}
+
+	// suggestion : add DeletedTask to deleted_task table
+	dateOfNow := time.Now()
+	deleting_task := DeletedTask{
+		User:          task.User,
+		Id:            task.Id,
+		ConditionId:   task.ConditionId,
+		CreatedAt:     task.CreatedAt,
+		DueDate:       task.DueDate,
+		DeletedAtUnix: dateOfNow.Unix(),
+	}
+	_, err = db.Exec("INSERT INTO deletd_task (user, id, condition_id, created_at, due_date, deleted_at_unix) VALUES (?,?,?,?,?,?)", deleting_task.User, deleting_task.Id, deleting_task.ConditionId, deleting_task.CreatedAt, deleting_task.DueDate, deleting_task.DeletedAtUnix)
+	if err != nil {
+		fmt.Println(err)
+		return c.JSON(http.StatusInternalServerError, map[string]string{"error": "Failed to execute database query"})
+	}
+
 	return c.JSON(http.StatusOK, TaskRes{
 		Id:          task.Id,
 		Title:       task.Title,
