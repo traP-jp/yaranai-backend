@@ -48,7 +48,7 @@ func dbInit() {
 
 func TestSuggest(t *testing.T) {
 	dbInit()
-	task, err := suggest("ramdos")
+	task, err := suggest("ramdos", 3)
 	if err != nil {
 		t.Errorf("unexpected error: %v", err)
 	}
